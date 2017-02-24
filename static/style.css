@@ -59,10 +59,10 @@ header {
     cursor: pointer;
 }
 
-#titles ul {
+#titles ul, #graphs ul {
     padding:0;
 }
-#titles ul li {
+#titles ul li, #graphs ul li {
     list-style-type: none;
     margin-bottom: 10px;
 }
