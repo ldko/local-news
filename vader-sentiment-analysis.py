@@ -13,7 +13,7 @@ import json
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
-def get_scores(filename='./fragement-extract/articles.json'):
+def get_scores(filename):
     with open(filename, "r") as jsonf:
         news_sources = json.load(jsonf)
     for news_source in news_sources:
@@ -42,7 +42,6 @@ def get_score(sentences):
         neg1 += vs['neg']
         neu1 += vs['neu']
         pos1 += vs['pos']
-
     scores = {}
     scores['neg'] = float(neg1/c)
     scores['neu'] = float(neu1/c)
