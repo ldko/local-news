@@ -1,11 +1,30 @@
 <html>
     <head>
         <title>Local News</title>
+        <script type="text/javascript" src="static/mapstyles.js"></script>
+        <script type="text/javascript" src="static/site.js"></script>
+        <link rel="stylesheet" type="text/css" href="static/style.css">
     </head>
     <body>
-        <div id="map"></div>
+        <section class="container">
+            <header>
+                <h1>Good news bad news</h1>
+                <div class="ruler"></div>
+            </header>
+            <div id="map"></div>
+            <div class="widgets">
+                <div id="titles">
+                    titles can go here...
+                </div>
+                <div id="graphs">
+                    Graphs here
+                </div>
+                <div id="word-cloud">
+                    word cloud here
+                </div>
+            </div>
+        </section>
 
-        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCxO-06AZd8xruTdL65A91jrwJASK5XMdk&libraries=visualization&callback=initMap"></script>
-        <script type="text/javascript" src="site.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCxO-06AZd8xruTdL65A91jrwJASK5XMdk&libraries=visualization&callback=initMap"></script>
     </body>
 </html>
