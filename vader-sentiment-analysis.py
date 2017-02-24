@@ -1,76 +1,86 @@
+#!/usr/bin/env python
 
 #code from:https://github.com/cjhutto/vaderSentiment#vader-sentiment-analysis
 #code altered by:Lulwah Alkwai-ODU, Feb 23, 2017
-
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 #note: depending on how you installed (e.g., using source code download versus pip install), you may need to import like this:
 #from vaderSentiment import SentimentIntensityAnalyzer
 
+from __future__ import print_function
 
-openfile=open("sample.txt","r")
-sentences=[]
-analyzer = SentimentIntensityAnalyzer()
-for line in openfile:
-    #print line
-    line=line.split("\t")
-    title=line[0]
-    #print title
-    link=line[1]
-    #print link
-    if title not in sentences:
-        sentences.append(title)
+import argparse
+import json
 
-sentences.sort()
-neg1=0
-neu1=0
-pos1=0
-c=0
-for sentence in sentences:
-        c=c+1
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
+
+def get_scores(filename='./fragement-extract/articles.json'):
+    with open(filename, "r") as jsonf:
+        news_sources = json.load(jsonf)
+    for news_source in news_sources:
+        texts = clean_texts(news_source['links'])
+        if texts:
+            print(news_source['url'], get_score(texts))
+
+
+def clean_texts(texts):
+    """Only count text over four words and remove duplicates."""
+    cleaned_texts = [x.replace('\n', '') for x in texts if len(x.split(' ')) > 3]
+    return list(set(cleaned_texts))
+
+
+def get_score(sentences):
+    """Takes lists of texts."""
+    analyzer = SentimentIntensityAnalyzer()
+
+    neg1 = 0
+    neu1 = 0
+    pos1 = 0
+    c = 0
+    for sentence in sentences:
+        c = c + 1
         vs = analyzer.polarity_scores(sentence)
-        print("{:-<65} {}".format(sentence, str(vs)))
-        vx=("{:-<65} {}".format(sentence, str(vs)))
-        vx=vx.split("{")
-        #print vx
-        vxx=vx[1].split(",")
+        vx = ("{:-<65} {}".format(sentence, str(vs)))
+        vx = vx.split("{")
+        vxx = vx[1].split(",")
+
         #1
-        neg=vxx[0]
-        neg=neg.split(":")
-        negative=neg[1]
-        negative=float(negative.strip())
-        neg1=neg1+negative
-        #print negative
+        neg = vxx[0]
+        neg = neg.split(":")
+        negative = neg[1]
+        negative = float(negative.strip())
+        neg1 = neg1 + negative
         
         #2
-        neu=vxx[1]
-        neu=neu.split(":")
-        neutural=neu[1]
-        neutural=float(neutural.strip())
-        neu1=neu1+neutural
-        #print neutural
+        neu = vxx[1]
+        neu = neu.split(":")
+        neutural = neu[1]
+        neutural = float(neutural.strip())
+        neu1 = neu1 + neutural
         
         #3
-        pos=vxx[2]
-        pos=pos.split(":")
-        positive=pos[1]
-        positive=float(positive.strip())
-        pos1=pos1+positive
-        #print positive
+        pos = vxx[2]
+        pos = pos.split(":")
+        positive = pos[1]
+        positive = float(positive.strip())
+        pos1 = pos1 + positive
 
-print "\n"
+    scores = {}
+    scores['neg'] = float(neg1/c) * 100.0
+    scores['neu'] = float(neu1/c) * 100.0
+    scores['pos'] = float(pos1/c) * 100.0
+    print(scores)
+    max_key = max(scores, key=scores.get)
+    return max_key, scores[max_key]
 
-#print "total negative="+str(neg1)
-neg2=float(neg1/c)*100.0
-print "avg negative="+str(neg2)
 
-#print "total neutral="+str(neu1)
-neu2=float(neu1/c)*100.0
-print "avg neutral="+str(neu2)
+def main():
+    """Determine sentiment of text."""
+    description = ('Determines sentiment of text.')
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('filename', help='file of JSON')
+    args = parser.parse_args()
+    get_scores(args.filename)
 
-#print "total positive="+str(pos1)
-pos2=float(pos1/c)*100.0
-print "avg positive="+str(pos2)
 
-print "\n"
-
-print "number of titles="+str(c)
+if __name__ == '__main__':
+    main()
