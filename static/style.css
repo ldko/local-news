@@ -34,10 +34,42 @@ header {
     margin-top: 15px;
 }
 .widgets > * {
-    background: #DEDEDE;
+    border: solid 1px;
+    border-color:#CCC;
     width: 100%;
     padding: 15px;
 }
 .widgets > *:nth-child(2) {
     margin: 0 15px;
+}
+
+.map-container {
+    position: relative;
+}
+.map-container button {
+    position: absolute;
+    z-index: 99;
+    top: 5px;
+    left: 5px;
+    border:0;
+    background: #FFF;
+}
+.map-container button:hover {
+    color: blue;
+    cursor: pointer;
+}
+
+#titles ul {
+    padding:0;
+}
+#titles ul li {
+    list-style-type: none;
+    margin-bottom: 10px;
+}
+#titles ul li:hover {
+    color: blue;
+    cursor: pointer;
+}
+#word-cloud img {
+    width: 100%;
 }

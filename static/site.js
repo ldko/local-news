@@ -2,6 +2,7 @@ var map, negativeHeatmap, positiveHeatmap, geocoder;
 
 function initMap() {
   geocoder = new google.maps.Geocoder();
+  document.getElementById("points").addEventListener('click', showPoints);
 
   map = new google.maps.Map(document.getElementById('map'), {
     zoom: 4,
@@ -16,12 +17,13 @@ function initMap() {
     draggable: false
   });
 
-  var netMood = 0;
-  for(var i=0; i < sampleData[0].headlines.length; i++) {
-    netMood += sampleData[0].headlines[i].data.compound;
+  for(var j=0; j < sampleData.length; j++) {
+    var netMood = 0;
+    for(var i=0; i < sampleData[j].headlines.length; i++) {
+      netMood += sampleData[j].headlines[i].data.compound;
+    }
+    sampleData[j].netMood = netMood;
   }
-  sampleData[0].netMood = netMood;
-  console.log(netMood);
 
   geocoder.geocode( { address: sampleData[0].city }, function(results, status) {
     if (status == google.maps.GeocoderStatus.OK) {
@@ -89,4 +91,36 @@ function plotData() {
       ]
     });
   }
+}
+
+function showPoints() {
+  for(var i=0; i < sampleData.length; i++) {
+    var marker = new google.maps.Marker({
+      position: sampleData[i].location,
+      map: map,
+      title: sampleData[i].paper,
+      animation: google.maps.Animation.DROP,
+      data: sampleData[i]
+    });
+
+    marker.addListener('click', function() {
+      // super quick word cloud generation ; )
+      document.getElementById("word-cloud").innerHTML = "<img src='static/wordcloud.svg'>";
+
+      var titels = document.getElementById('titles');
+      var html = '<h3>Headlines</h3><ul>';
+      for(var k=0; k < marker.data.headlines.length; k++) {
+        html += '<li onClick="showRelated(\''+marker.data.headlines[k].title+'\');">'+marker.data.headlines[k].title+'</li>';
+      }
+      html+='</ul>';
+      titles.innerHTML = html;
+    });
+
+  }
+}
+
+function showRelated(headline) {
+  fetch('http://206.167.180.171:8080/related/2017-7-27/'+encodeURIComponent(headline)).then(function(response) {
+    alert(response);
+  });
 }

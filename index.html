@@ -2,7 +2,7 @@
     <head>
         <title>Local News</title>
 
-        <script type="text/javascript" src="static/sample.js"></script>
+        <script type="text/javascript" charset="UTF-8" src="static/sample.js"></script>
         <script type="text/javascript" src="static/mapstyles.js"></script>
         <script type="text/javascript" src="static/site.js"></script>
         <link rel="stylesheet" type="text/css" href="static/style.css">
@@ -10,10 +10,13 @@
     <body>
         <section class="container">
             <header>
-                <h1>Good news bad news</h1>
+                <h1><span style="color: #66DE70;">Good News</span> / <span style="color:#E87175;">Bad News</span></h1>
                 <div class="ruler"></div>
             </header>
-            <div id="map"></div>
+            <div class="map-container">
+                <button id="points">Show Points</button>
+                <div id="map"></div>
+            </div>
             <div class="widgets">
                 <div id="titles">
                     titles can go here...

@@ -114,22 +114,22 @@ var sampleData = [
             },
 
             {
-                "title":"‘Ballers’ fails to deliver on its bombastic promises in season premiere",
+                "title":"'Ballers' fails to deliver on its bombastic promises in season premiere",
                 "data":{"neg": 0.194, "neu": 0.625, "pos": 0.181, "compound": -0.0516}
             },
 
             {
-                "title":"‘Captain Fantastic’ is a brave exploration of the human condition",
+                "title":"'Captain Fantastic' is a brave exploration of the human condition",
                 "data":{"neg": 0.0, "neu": 0.569, "pos": 0.431, "compound": 0.6486}
             },
 
             {
-                "title":"‘Suits’ finds itself in an identity crisis in latest season",
+                "title":"'Suits' finds itself in an identity crisis in latest season",
                 "data":{"neg": 0.313, "neu": 0.687, "pos": 0.0, "compound": -0.6249}
             },
 
             {
-                "title":"‘Your Authority’ shows how Good Charlotte's talent has yet to waver",
+                "title":"'Your Authority' shows how Good Charlotte's talent has yet to waver",
                 "data":{"neg": 0.0, "neu": 0.612, "pos": 0.388, "compound": 0.6908}
             }
         ]
