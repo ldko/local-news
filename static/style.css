@@ -64,7 +64,10 @@ header {
 }
 #titles ul li, #graphs ul li {
     list-style-type: none;
-    margin-bottom: 10px;
+    padding: 10px 0;
+}
+#titles ul li:first-child, #graphs ul li:first-child {
+    padding-top:0;
 }
 #titles ul li:hover {
     color: blue;

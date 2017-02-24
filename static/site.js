@@ -121,6 +121,7 @@ function showPoints() {
 
 function showRelated(headline) {
   fetch('http://206.167.180.171:8080/related/20170727/'+encodeURIComponent(headline)).then(function(response) {
+    console.log(response);
     var data = JSON.parse(response);
 
     var html = '<h3>Related</h3><ul>';
