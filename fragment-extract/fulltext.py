@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 import sys
 import re
 from pprint import pprint
+import json
 
 from binaryornot.check import is_binary_string
 from io import BytesIO
@@ -73,20 +74,41 @@ def main(url_list):
         extract_html(entry, text)
 
 
+docs = []
+
+
 def extract_html(entry, text):
-    print(entry.get('url'))
+    global docs
+
     soup =  BeautifulSoup(text, 'html.parser')
 
     tags = soup.findAll('a')
 
-    pprint([t.string for t in tags])
+    doc = {'url': entry.get('url'),
+           'timestamp': entry.get('timestamp')
+          }
+
+    headlines = []
+    for t in tags:
+        if not t or not t.string:
+            continue
+
+        string = t.string.strip()
+
+        headlines.append(string)
+
+    doc['links'] = headlines
+
+    #pprint(headlines)
+    docs.append(doc)
 
 
 
 if __name__ == "__main__":
-    with open('articles.txt') as fh:
+    with open('filter_urls.txt') as fh:
         url_list = [url.strip() for url in fh.readlines()]
 
-    print(url_list)
     main(url_list)
+
+    print(json.dumps(docs))
 
