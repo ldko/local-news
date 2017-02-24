@@ -7,7 +7,13 @@ function initMap() {
     zoom: 4,
     center: {lat: 37.09024, lng: -95.712891},
     mapTypeId: 'roadmap',
-    styles: customMapStyle
+    styles: customMapStyle,
+    scrollwheel: false,
+    mapTypeControl: false,
+    scaleControl: false,
+    disableDoubleClickZoom: true,
+    disableDefaultUI: true,
+    draggable: false
   });
 
   var netMood = 0;
@@ -38,7 +44,7 @@ function plotData() {
         { location: sampleData[0].location, weight: sampleData[0].netMood }
       ],
       map: map,
-      radius: 30,
+      radius: 40,
       gradient: [
         'rgba(0,0,0,0)',
         'rgba(229, 255, 229, 0.1)',
@@ -63,7 +69,7 @@ function plotData() {
         {location: sampleData[0].location, weight: sampleData[0].netMood}
       ],
       map: map,
-      radius: 30,
+      radius: 40,
       gradient: [
         'rgba(0,0,0,0)',
         'rgba(255, 248, 248, 0.1)',
