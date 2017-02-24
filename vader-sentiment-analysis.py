@@ -35,40 +35,18 @@ def get_score(sentences):
     neg1 = 0
     neu1 = 0
     pos1 = 0
-    c = 0
+    c = len(sentences)
     for sentence in sentences:
-        c = c + 1
+        # vs example: {'compound': -0.6705, 'neu': 0.522, 'pos': 0.0, 'neg': 0.478}
         vs = analyzer.polarity_scores(sentence)
-        vx = ("{:-<65} {}".format(sentence, str(vs)))
-        vx = vx.split("{")
-        vxx = vx[1].split(",")
-
-        #1
-        neg = vxx[0]
-        neg = neg.split(":")
-        negative = neg[1]
-        negative = float(negative.strip())
-        neg1 = neg1 + negative
-        
-        #2
-        neu = vxx[1]
-        neu = neu.split(":")
-        neutural = neu[1]
-        neutural = float(neutural.strip())
-        neu1 = neu1 + neutural
-        
-        #3
-        pos = vxx[2]
-        pos = pos.split(":")
-        positive = pos[1]
-        positive = float(positive.strip())
-        pos1 = pos1 + positive
+        neg1 += vs['neg']
+        neu1 += vs['neu']
+        pos1 += vs['pos']
 
     scores = {}
     scores['neg'] = float(neg1/c) * 100.0
     scores['neu'] = float(neu1/c) * 100.0
     scores['pos'] = float(pos1/c) * 100.0
-    print(scores)
     max_key = max(scores, key=scores.get)
     return max_key, scores[max_key]
 
