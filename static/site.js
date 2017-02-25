@@ -121,14 +121,13 @@ function showPoints() {
 
 function showRelated(headline) {
   fetch('http://206.167.180.171:8080/related/20160727/'+encodeURIComponent(headline)).then(function(response) {
-    console.log(response);
-    var data = JSON.parse(response);
-
-    var html = '<h3>Related</h3><ul>';
-    for(var k=0; k < data.related.length; k++) {
-      html += '<li>'+data.related[k][0]+': '+data.related[k][1]+'</li>';
-    }
-    html+='</ul>';
-    document.getElementById('graphs').innerHTML = html;
+    return response.json().then( function (data){
+        var html = '<h3>Related</h3><ul>';
+        for(var k=0; k < data.related.length; k++) {
+          html += '<li>'+data.related[k][0]+': '+data.related[k][1]+'</li>';
+        }
+        html+='</ul>';
+        document.getElementById('graphs').innerHTML = html;
+      })
   });
 }
