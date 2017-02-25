@@ -120,7 +120,7 @@ function showPoints() {
 }
 
 function showRelated(headline) {
-  fetch('http://206.167.180.171:8080/related/20170727/'+encodeURIComponent(headline)).then(function(response) {
+  fetch('http://206.167.180.171:8080/related/20160727/'+encodeURIComponent(headline)).then(function(response) {
     console.log(response);
     var data = JSON.parse(response);
 
