@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 
-#code from:https://github.com/cjhutto/vaderSentiment#vader-sentiment-analysis
-#code altered by:Lulwah Alkwai-ODU, Feb 23, 2017
-#note: depending on how you installed (e.g., using source code download versus pip install), you may need to import like this:
-#from vaderSentiment import SentimentIntensityAnalyzer
-
 from __future__ import print_function
 
 import argparse
@@ -14,16 +9,14 @@ import json
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
-def get_scores(filename):
-    paper_info = {}
-    with open('./sources.csv') as csvf:
-        creader = csv.DictReader(csvf)
-        for row in creader:
-            paper_info[row['URL']] = {'city': row['City'], 'paper': row['Outlet Name']}
+def get_scores(news_sources, paper_info):
+    """Generates sentiment scores for news headlines.
+
+    news_sources is JSON news headlines per news source/date.
+    paper_info is a dict of each paper's title/city data.
+    """
     analyzer = SentimentIntensityAnalyzer()
-    full_sources = sources = []
-    with open(filename, "r") as jsonf:
-        news_sources = json.load(jsonf)
+    full_sources = []
     for news_source in news_sources:
         sources = {}
         texts = clean_texts(news_source['links'])
@@ -43,7 +36,6 @@ def get_scores(filename):
         sources['city'] = title['city']
         full_sources.append(sources)
     return json.dumps(full_sources, indent=4, sort_keys=True)
-                
 
 
 def clean_texts(texts):
@@ -53,12 +45,26 @@ def clean_texts(texts):
 
 
 def main():
-    """Determine sentiment of text."""
-    description = ('Determines sentiment of text.')
+    """Determine sentiment of news headlines."""
+    description = ('Determines sentiment of news headlines.')
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('filename', help='file of JSON')
+    parser.add_argument('filename', help='file of headlines JSON')
     args = parser.parse_args()
-    print('var sampleData =', get_scores(args.filename))
+    paper_info = {}
+
+    # Load the headline data.
+    with open(args.filename, 'r') as jsonf:
+        news_sources = json.load(jsonf)
+
+    # Load the newspaper sources data.
+    with open('./sources.csv') as csvf:
+        creader = csv.DictReader(csvf)
+        for row in creader:
+            paper_info[row['URL']] = {'city': row['City'],
+                                      'paper': row['Outlet Name']}
+
+    # Output JavaScript data for visualization.
+    print('var sampleData = ' + get_scores(news_sources, paper_info) + ';')
 
 
 if __name__ == '__main__':
