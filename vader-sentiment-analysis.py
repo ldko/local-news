@@ -48,7 +48,7 @@ def get_scores(filename):
 
 def clean_texts(texts):
     """Only count text over four words and remove duplicates."""
-    cleaned_texts = [x.replace('\n', '') for x in texts if len(x.split(' ')) > 3]
+    cleaned_texts = [x.replace('\n', ' ') for x in texts if len(x.split(' ')) > 3]
     return list(set(cleaned_texts))
 
 
