@@ -8,17 +8,24 @@
 from __future__ import print_function
 
 import argparse
+import csv
 import json
 
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
 def get_scores(filename):
+    paper_info = {}
+    with open('./sources.csv') as csvf:
+        creader = csv.DictReader(csvf)
+        for row in creader:
+            paper_info[row['URL']] = {'city': row['City'], 'paper': row['Outlet Name']}
     analyzer = SentimentIntensityAnalyzer()
-    sources = {}
+    full_sources = sources = []
     with open(filename, "r") as jsonf:
         news_sources = json.load(jsonf)
     for news_source in news_sources:
+        sources = {}
         texts = clean_texts(news_source['links'])
         if not texts:
             continue
@@ -26,8 +33,16 @@ def get_scores(filename):
         for sentence in texts:
             source_data.append({'data': analyzer.polarity_scores(sentence),
                                 'title': sentence})
-        sources[news_source['url']] = source_data
-    return json.dumps(sources)
+        try:
+            title = paper_info[news_source['url'].strip('/')]
+        except KeyError:
+            title = paper_info[news_source['url']]
+        sources['paper'] = title['paper']
+        sources['headlines'] = source_data
+        sources['date'] = news_source['timestamp'][:9]
+        sources['city'] = title['city']
+        full_sources.append(sources)
+    return json.dumps(full_sources, indent=4, sort_keys=True)
                 
 
 
@@ -43,7 +58,7 @@ def main():
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('filename', help='file of JSON')
     args = parser.parse_args()
-    print(get_scores(args.filename))
+    print('var sampleData =', get_scores(args.filename))
 
 
 if __name__ == '__main__':
