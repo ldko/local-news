@@ -27,7 +27,7 @@ function initMap() {
   }
 
   var index = 0;
-  var total = sampleData.length-1;
+  var total = sampleData.length;
   var doProcess = function () {
     if(index==total)
       return plotData();
