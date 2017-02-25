@@ -1,6 +1,5 @@
 var map, negativeHeatmap, positiveHeatmap, geocoder;
 var markers = [];
-var geoKey = 'AIzaSyCxp9fIGK9GddYNvYLToye8vfDXNXfS_v4';
 
 function initMap() {
   geocoder = new google.maps.Geocoder();
@@ -20,7 +19,6 @@ function initMap() {
   });
 
   for(var j=0; j < sampleData.length; j++) {
-
     var netMood = 0;
     for(var i=0; i < sampleData[j].headlines.length; i++) {
       netMood += sampleData[j].headlines[i].data.compound;
@@ -144,7 +142,8 @@ function showPoints() {
 
       // super quick word cloud generation ; )
       document.getElementById("word-cloud").innerHTML = "<img src='static/wordcloud.svg'>";
-      var titels = document.getElementById('titles');
+
+      var titles = document.getElementById('titles');
       var html = '<h3>Headlines</h3><ul>';
       for(var k=0; k < this.data.length; k++) {
         html += '<li onClick="showRelated(\''+this.data[k].title+'\');">'+this.data[k].title+'</li>';
