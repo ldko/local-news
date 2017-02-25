@@ -1,4 +1,6 @@
 var map, negativeHeatmap, positiveHeatmap, geocoder;
+var markers = [];
+var geoKey = 'AIzaSyCxp9fIGK9GddYNvYLToye8vfDXNXfS_v4';
 
 function initMap() {
   geocoder = new google.maps.Geocoder();
@@ -18,6 +20,7 @@ function initMap() {
   });
 
   for(var j=0; j < sampleData.length; j++) {
+
     var netMood = 0;
     for(var i=0; i < sampleData[j].headlines.length; i++) {
       netMood += sampleData[j].headlines[i].data.compound;
@@ -25,92 +28,126 @@ function initMap() {
     sampleData[j].netMood = netMood;
   }
 
-  geocoder.geocode( { address: sampleData[0].city }, function(results, status) {
-    if (status == google.maps.GeocoderStatus.OK) {
-        sampleData[0].location = results[0].geometry.location;
+  var index = 0;
+  var total = sampleData.length-1;
+  var doProcess = function () {
+    if(index==total)
+      return plotData();
 
-        // would plot after processing all points..
-        plotData();
-    }else{
-        console.log('error: '+_stores[i].store+' status: '+status);
+    // check for locally cached geos
+    var geos = JSON.parse(localStorage.geos || "{}");
+    if(typeof geos[sampleData[index].city] !== "undefined") {
+      var loc = geos[sampleData[index].city];
+      sampleData[index].location = new google.maps.LatLng(loc.lat, loc.lng);
+      index++;
+      return doProcess();
     }
-  });
+
+    geocoder.geocode( { address: sampleData[index].city }, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+
+          var cache = JSON.parse(localStorage.geos || "{}");
+          cache[sampleData[index].city] = results[0].geometry.location;
+          localStorage.geos = JSON.stringify(cache);
+          console.log('caching ', sampleData[index].city);
+
+          sampleData[index].location = results[0].geometry.location;
+      } else {
+          console.log('error: '+status);
+      }
+
+      setTimeout(doProcess, 500);
+      index++;
+    });
+  }
+
+  doProcess();
 }
 
 
 function plotData() {
 
-  if(sampleData[0].netMood > 0) {
-    positiveHeatmap = new google.maps.visualization.HeatmapLayer({
-      data: [
-        { location: sampleData[0].location, weight: sampleData[0].netMood }
-      ],
-      map: map,
-      radius: 40,
-      gradient: [
-        'rgba(0,0,0,0)',
-        'rgba(229, 255, 229, 0.1)',
-        'rgba(229, 255, 229, 0.2)',
-        'rgba(229, 255, 229, 0.3)',
+  for(var i=0; i < sampleData.length; i++) {
+    // skip other date for now
+    if(sampleData[i].date !== '201607271') continue;
 
-        'rgba(229, 255, 229, 0.4)',
-        'rgba(204, 255, 204, 0.5)',
-        'rgba(178, 255, 178, 0.6)',
-        'rgba(153, 255, 153, 0.65)',
-        'rgba(127, 255, 127, 0.7)',
-        'rgba(102, 255, 102, 0.75)',
-        'rgba(76, 255, 76, 0.8)',
-        'rgba(50, 255, 50, 0.9)',
-        'rgba(25, 255, 25, 0.95)',
-        'rgba(0, 255, 0, 1.0)'
-      ]
-    });
-  } else {
-    negativeHeatmap = new google.maps.visualization.HeatmapLayer({
-      data: [
-        {location: sampleData[0].location, weight: sampleData[0].netMood}
-      ],
-      map: map,
-      radius: 40,
-      gradient: [
-        'rgba(0,0,0,0)',
-        'rgba(255, 248, 248, 0.1)',
-        'rgba(255, 235, 236, 0.2)',
-        'rgba(255, 233, 234, 0.3)',
+    if(sampleData[i].netMood > 0) {
+      positiveHeatmap = new google.maps.visualization.HeatmapLayer({
+        data: [
+          { location: sampleData[i].location, weight: sampleData[i].netMood }
+        ],
+        map: map,
+        radius: 40,
+        gradient: [
+          'rgba(0,0,0,0)',
+          'rgba(229, 255, 229, 0.1)',
+          'rgba(229, 255, 229, 0.2)',
+          'rgba(229, 255, 229, 0.3)',
 
-        'rgba(255, 229, 229, 0.4)',
-        'rgba(255, 204, 204, 0.5)',
-        'rgba(255, 178, 178, 0.6)',
-        'rgba(255, 153, 153, 0.65)',
-        'rgba(255, 127, 127, 0.7)',
-        'rgba(255, 102, 102, 0.75)',
-        'rgba(255, 76, 76, 0.8)',
-        'rgba(255, 50, 50, 0.9)',
-        'rgba(255, 25, 25, 0.95)',
-        'rgba(255, 0, 0, 1.0)'
-      ]
-    });
+          'rgba(229, 255, 229, 0.4)',
+          'rgba(204, 255, 204, 0.5)',
+          'rgba(178, 255, 178, 0.6)',
+          'rgba(153, 255, 153, 0.65)',
+          'rgba(127, 255, 127, 0.7)',
+          'rgba(102, 255, 102, 0.75)',
+          'rgba(76, 255, 76, 0.8)',
+          'rgba(50, 255, 50, 0.9)',
+          'rgba(25, 255, 25, 0.95)',
+          'rgba(0, 255, 0, 1.0)'
+        ]
+      });
+    } else {
+      negativeHeatmap = new google.maps.visualization.HeatmapLayer({
+        data: [
+          {location: sampleData[i].location, weight: Math.abs(sampleData[i].netMood) }
+        ],
+        map: map,
+        radius: 40,
+        gradient: [
+          'rgba(0,0,0,0)',
+          'rgba(255, 248, 248, 0.1)',
+          'rgba(255, 235, 236, 0.2)',
+          'rgba(255, 233, 234, 0.3)',
+
+          'rgba(255, 229, 229, 0.4)',
+          'rgba(255, 204, 204, 0.5)',
+          'rgba(255, 178, 178, 0.6)',
+          'rgba(255, 153, 153, 0.65)',
+          'rgba(255, 127, 127, 0.7)',
+          'rgba(255, 102, 102, 0.75)',
+          'rgba(255, 76, 76, 0.8)',
+          'rgba(255, 50, 50, 0.9)',
+          'rgba(255, 25, 25, 0.95)',
+          'rgba(255, 0, 0, 1.0)'
+        ]
+      });
+    }
   }
 }
 
 function showPoints() {
+  if(markers.length) return;
+
   for(var i=0; i < sampleData.length; i++) {
-    var marker = new google.maps.Marker({
+    if(sampleData[i].date !== '201607271') continue;
+
+    markers.push(new google.maps.Marker({
       position: sampleData[i].location,
       map: map,
-      title: sampleData[i].paper,
       animation: google.maps.Animation.DROP,
-      data: sampleData[i]
-    });
+      data: sampleData[i].headlines
+    }));
 
-    marker.addListener('click', function() {
+    google.maps.event.addListener(markers[markers.length-1], 'click', function() {
+      // clear out related
+      document.getElementById('graphs').innerHTML = "";
+
       // super quick word cloud generation ; )
       document.getElementById("word-cloud").innerHTML = "<img src='static/wordcloud.svg'>";
-
       var titels = document.getElementById('titles');
       var html = '<h3>Headlines</h3><ul>';
-      for(var k=0; k < marker.data.headlines.length; k++) {
-        html += '<li onClick="showRelated(\''+marker.data.headlines[k].title+'\');">'+marker.data.headlines[k].title+'</li>';
+      for(var k=0; k < this.data.length; k++) {
+        html += '<li onClick="showRelated(\''+this.data[k].title+'\');">'+this.data[k].title+'</li>';
       }
       html+='</ul>';
       titles.innerHTML = html;
