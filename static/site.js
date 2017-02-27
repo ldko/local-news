@@ -43,6 +43,7 @@ function plotData() {
   var positiveHeatmapData = [];
   var negativeHeatmapData = [];
   for(var i=0; i < sampleData.length; i++) {
+    if(sampleData[i].date !== '201607271') continue;
     var point = new google.maps.LatLng(sampleData[i].location.lat, sampleData[i].location.lng);
     var weight = normalizeMood(Math.abs(sampleData[i].netMood), minMood, maxMood);
     if(sampleData[i].netMood > 0) {
@@ -98,6 +99,7 @@ function plotData() {
 
 function showPoints() {
   for(var i=0; i < sampleData.length; i++) {
+    if(sampleData[i].date !== '201607271') continue;
     var marker = new google.maps.Marker({
       position: sampleData[i].location,
       map: map,
