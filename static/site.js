@@ -1,8 +1,6 @@
-var map, negativeHeatmap, positiveHeatmap, geocoder;
-var markers = [];
+var map, negativeHeatmap, positiveHeatmap;
 
 function initMap() {
-  geocoder = new google.maps.Geocoder();
   document.getElementById("points").addEventListener('click', showPoints);
 
   map = new google.maps.Map(document.getElementById('map'), {
@@ -99,8 +97,6 @@ function plotData() {
 }
 
 function showPoints() {
-  if(markers.length) return;
-
   for(var i=0; i < sampleData.length; i++) {
     if(sampleData[i].date !== '201607271') continue;
 
@@ -108,10 +104,10 @@ function showPoints() {
       position: sampleData[i].location,
       map: map,
       animation: google.maps.Animation.DROP,
-      data: sampleData[i].headlines
-    }));
+      data: sampleData[i]
+    });
 
-    google.maps.event.addListener(marker, 'click', (function(lmap, lmarker) { 
+    google.maps.event.addListener(marker, 'click', (function(lmap, lmarker) {
       return function() {
         // super quick word cloud generation
         document.getElementById("word-cloud").innerHTML = "<img src='static/wordcloud.svg'>";
