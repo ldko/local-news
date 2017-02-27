@@ -1,4 +1,5 @@
 var map, negativeHeatmap, positiveHeatmap, geocoder;
+var markers = [];
 
 function initMap() {
   geocoder = new google.maps.Geocoder();
@@ -98,15 +99,17 @@ function plotData() {
 }
 
 function showPoints() {
+  if(markers.length) return;
+
   for(var i=0; i < sampleData.length; i++) {
     if(sampleData[i].date !== '201607271') continue;
+
     var marker = new google.maps.Marker({
       position: sampleData[i].location,
       map: map,
-      title: sampleData[i].paper,
       animation: google.maps.Animation.DROP,
-      data: sampleData[i]
-    });
+      data: sampleData[i].headlines
+    }));
 
     google.maps.event.addListener(marker, 'click', (function(lmap, lmarker) { 
       return function() {
