@@ -106,19 +106,20 @@ function showPoints() {
       data: sampleData[i]
     });
 
-    marker.addListener('click', function() {
-      // super quick word cloud generation ; )
-      document.getElementById("word-cloud").innerHTML = "<img src='static/wordcloud.svg'>";
+    google.maps.event.addListener(marker, 'click', (function(lmap, lmarker) { 
+      return function() {
+        // super quick word cloud generation
+        document.getElementById("word-cloud").innerHTML = "<img src='static/wordcloud.svg'>";
 
-      var titles = document.getElementById('titles');
-      var html = '<h3>Headlines</h3><ul>';
-      for(var k=0; k < marker.data.headlines.length; k++) {
-        html += '<li onClick="showRelated(\''+marker.data.headlines[k].title+'\');">'+marker.data.headlines[k].title+'</li>';
-      }
-      html+='</ul>';
-      titles.innerHTML = html;
-    });
-
+        var titles = document.getElementById('titles');
+        var html = '<h3>Headlines</h3><ul>';
+        for(var k=0; k < lmarker.data.headlines.length; k++) {
+          html += '<li onClick="showRelated(\'' + lmarker.data.headlines[k].title + '\');">' + lmarker.data.headlines[k].title + '</li>';
+        }
+        html+='</ul>';
+        titles.innerHTML = html;
+        }
+    })(map, marker));
   }
 }
 
