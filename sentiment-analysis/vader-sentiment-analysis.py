@@ -6,6 +6,7 @@ import argparse
 import csv
 import json
 
+import geocoder
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
@@ -18,7 +19,7 @@ def get_scores(news_sources, paper_info):
     analyzer = SentimentIntensityAnalyzer()
     full_sources = []
     for news_source in news_sources:
-        sources = {}
+        source = {}
         texts = clean_texts(news_source['links'])
         if not texts:
             continue
@@ -30,11 +31,15 @@ def get_scores(news_sources, paper_info):
             title = paper_info[news_source['url'].strip('/')]
         except KeyError:
             title = paper_info[news_source['url']]
-        sources['paper'] = title['paper']
-        sources['headlines'] = source_data
-        sources['date'] = news_source['timestamp'][:9]
-        sources['city'] = title['city']
-        full_sources.append(sources)
+        source['paper'] = title['paper']
+        source['headlines'] = source_data
+        source['date'] = news_source['timestamp'][:9]
+        source['city'] = title['city']
+        # Get location.
+        coordinates = geocoder.google(title['city']).latlng
+        location = {'lat': coordinates[0], 'lng': coordinates[1]}
+        source['location'] = location
+        full_sources.append(source)
     return json.dumps(full_sources, indent=4, sort_keys=True)
 
 
