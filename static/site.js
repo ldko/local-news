@@ -26,101 +26,76 @@ function initMap() {
     sampleData[j].netMood = netMood;
   }
 
-  var index = 0;
-  var total = sampleData.length;
-  var doProcess = function () {
-    if(index==total)
-      return plotData();
-
-    // check for locally cached geos
-    var geos = JSON.parse(localStorage.geos || "{}");
-    if(typeof geos[sampleData[index].city] !== "undefined") {
-      var loc = geos[sampleData[index].city];
-      sampleData[index].location = new google.maps.LatLng(loc.lat, loc.lng);
-      index++;
-      return doProcess();
-    }
-
-    geocoder.geocode( { address: sampleData[index].city }, function(results, status) {
-      if (status == google.maps.GeocoderStatus.OK) {
-
-          var cache = JSON.parse(localStorage.geos || "{}");
-          cache[sampleData[index].city] = results[0].geometry.location;
-          localStorage.geos = JSON.stringify(cache);
-          console.log('caching ', sampleData[index].city);
-
-          sampleData[index].location = results[0].geometry.location;
-      } else {
-          console.log('error: '+status);
-      }
-
-      setTimeout(doProcess, 500);
-      index++;
-    });
-  }
-
-  doProcess();
+  plotData();
 }
 
+function normalizeMood(value, min, max) {
+  return (value - min) / (max - min);
+}
 
 function plotData() {
+  // set up max and min for normalization
+  var moods = sampleData.map(function(newsSource) {
+    return newsSource.netMood;
+  });
+  var minMood = Math.min.apply(Math, moods);
+  var maxMood = Math.max.apply(Math, moods);
 
+  var positiveHeatmapData = [];
+  var negativeHeatmapData = [];
   for(var i=0; i < sampleData.length; i++) {
-    // skip other date for now
     if(sampleData[i].date !== '201607271') continue;
-
+    var point = new google.maps.LatLng(sampleData[i].location.lat, sampleData[i].location.lng);
+    var weight = normalizeMood(Math.abs(sampleData[i].netMood), minMood, maxMood);
     if(sampleData[i].netMood > 0) {
-      positiveHeatmap = new google.maps.visualization.HeatmapLayer({
-        data: [
-          { location: sampleData[i].location, weight: sampleData[i].netMood }
-        ],
-        map: map,
-        radius: 40,
-        gradient: [
-          'rgba(0,0,0,0)',
-          'rgba(229, 255, 229, 0.1)',
-          'rgba(229, 255, 229, 0.2)',
-          'rgba(229, 255, 229, 0.3)',
-
-          'rgba(229, 255, 229, 0.4)',
-          'rgba(204, 255, 204, 0.5)',
-          'rgba(178, 255, 178, 0.6)',
-          'rgba(153, 255, 153, 0.65)',
-          'rgba(127, 255, 127, 0.7)',
-          'rgba(102, 255, 102, 0.75)',
-          'rgba(76, 255, 76, 0.8)',
-          'rgba(50, 255, 50, 0.9)',
-          'rgba(25, 255, 25, 0.95)',
-          'rgba(0, 255, 0, 1.0)'
-        ]
-      });
+      positiveHeatmapData.push({'location': point, 'weight': weight});
     } else {
-      negativeHeatmap = new google.maps.visualization.HeatmapLayer({
-        data: [
-          {location: sampleData[i].location, weight: Math.abs(sampleData[i].netMood) }
-        ],
-        map: map,
-        radius: 40,
-        gradient: [
-          'rgba(0,0,0,0)',
-          'rgba(255, 248, 248, 0.1)',
-          'rgba(255, 235, 236, 0.2)',
-          'rgba(255, 233, 234, 0.3)',
-
-          'rgba(255, 229, 229, 0.4)',
-          'rgba(255, 204, 204, 0.5)',
-          'rgba(255, 178, 178, 0.6)',
-          'rgba(255, 153, 153, 0.65)',
-          'rgba(255, 127, 127, 0.7)',
-          'rgba(255, 102, 102, 0.75)',
-          'rgba(255, 76, 76, 0.8)',
-          'rgba(255, 50, 50, 0.9)',
-          'rgba(255, 25, 25, 0.95)',
-          'rgba(255, 0, 0, 1.0)'
-        ]
-      });
+      negativeHeatmapData.push({'location': point, 'weight': weight});
     }
   }
+
+  positiveHeatmap = new google.maps.visualization.HeatmapLayer({
+    data: positiveHeatmapData,
+    map: map,
+    radius: 40,
+    gradient: [
+      'rgba(0, 0, 0, 0)',
+      'rgba(229, 255, 229, 0.1)',
+      'rgba(229, 255, 229, 0.2)',
+      'rgba(229, 255, 229, 0.3)',
+      'rgba(229, 255, 229, 0.4)',
+      'rgba(204, 255, 204, 0.5)',
+      'rgba(178, 255, 178, 0.6)',
+      'rgba(153, 255, 153, 0.65)',
+      'rgba(127, 255, 127, 0.7)',
+      'rgba(102, 255, 102, 0.75)',
+      'rgba(76, 255, 76, 0.8)',
+      'rgba(50, 255, 50, 0.9)',
+      'rgba(25, 255, 25, 0.95)',
+      'rgba(0, 255, 0, 1.0)'
+    ]
+  });
+  negativeHeatmap = new google.maps.visualization.HeatmapLayer({
+    data: negativeHeatmapData,
+    map: map,
+    radius: 40,
+    gradient: [
+      'rgba(0, 0, 0, 0.0)',
+      'rgba(255, 248, 248, 0.1)',
+      'rgba(255, 235, 236, 0.2)',
+      'rgba(255, 233, 234, 0.3)',
+      'rgba(255, 229, 229, 0.4)',
+      'rgba(255, 204, 204, 0.5)',
+      'rgba(255, 178, 178, 0.6)',
+      'rgba(255, 153, 153, 0.65)',
+      'rgba(255, 127, 127, 0.7)',
+      'rgba(255, 102, 102, 0.75)',
+      'rgba(255, 76, 76, 0.8)',
+      'rgba(255, 50, 50, 0.9)',
+      'rgba(255, 25, 25, 0.95)',
+      'rgba(255, 0, 0, 1.0)'
+    ]
+  });
 }
 
 function showPoints() {
@@ -129,29 +104,27 @@ function showPoints() {
   for(var i=0; i < sampleData.length; i++) {
     if(sampleData[i].date !== '201607271') continue;
 
-    markers.push(new google.maps.Marker({
+    var marker = new google.maps.Marker({
       position: sampleData[i].location,
       map: map,
       animation: google.maps.Animation.DROP,
       data: sampleData[i].headlines
     }));
 
-    google.maps.event.addListener(markers[markers.length-1], 'click', function() {
-      // clear out related
-      document.getElementById('graphs').innerHTML = "";
+    google.maps.event.addListener(marker, 'click', (function(lmap, lmarker) { 
+      return function() {
+        // super quick word cloud generation
+        document.getElementById("word-cloud").innerHTML = "<img src='static/wordcloud.svg'>";
 
-      // super quick word cloud generation ; )
-      document.getElementById("word-cloud").innerHTML = "<img src='static/wordcloud.svg'>";
-
-      var titles = document.getElementById('titles');
-      var html = '<h3>Headlines</h3><ul>';
-      for(var k=0; k < this.data.length; k++) {
-        html += '<li onClick="showRelated(\''+this.data[k].title+'\');">'+this.data[k].title+'</li>';
-      }
-      html+='</ul>';
-      titles.innerHTML = html;
-    });
-
+        var titles = document.getElementById('titles');
+        var html = '<h3>Headlines</h3><ul>';
+        for(var k=0; k < lmarker.data.headlines.length; k++) {
+          html += '<li onClick="showRelated(\'' + lmarker.data.headlines[k].title + '\');">' + lmarker.data.headlines[k].title + '</li>';
+        }
+        html+='</ul>';
+        titles.innerHTML = html;
+        }
+    })(map, marker));
   }
 }
 
