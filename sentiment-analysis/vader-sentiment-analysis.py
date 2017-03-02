@@ -5,12 +5,19 @@ from __future__ import print_function
 import argparse
 import csv
 import json
+import os
+import time
+try:
+    # Python3
+    from urllib.parse import urlparse
+except:
+    from urlparse import urlparse
 
 import geocoder
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
-def get_scores(news_sources, paper_info):
+def get_scores(news_sources, paper_info, alexa_ranks=None):
     """Generates sentiment scores for news headlines.
 
     news_sources is JSON news headlines per news source/date.
@@ -35,10 +42,18 @@ def get_scores(news_sources, paper_info):
         source['headlines'] = source_data
         source['date'] = news_source['timestamp'][:9]
         source['city'] = title['city']
-        # Get location.
+        # Get location. Sleep to avoid request limit.
+        time.sleep(1)
         coordinates = geocoder.google(title['city']).latlng
         location = {'lat': coordinates[0], 'lng': coordinates[1]}
         source['location'] = location
+        # Get Alexa ranking by URL's domain.
+        domain = '.'.join(urlparse(news_source['url']).netloc.split('.')[-2:])
+        if alexa_ranks:
+            try:
+                source['rank'] = int(alexa_ranks[domain])
+            except KeyError:
+                source['rank'] = 0
         full_sources.append(source)
     return json.dumps(full_sources, indent=4, sort_keys=True)
 
@@ -55,21 +70,30 @@ def main():
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('filename', help='file of headlines JSON')
     args = parser.parse_args()
+
+    path = os.path.dirname(os.path.realpath(__file__))
     paper_info = {}
+    alexa_ranks = {}
 
     # Load the headline data.
     with open(args.filename, 'r') as jsonf:
         news_sources = json.load(jsonf)
 
     # Load the newspaper sources data.
-    with open('./sources.csv') as csvf:
+    with open(os.path.join(path, 'sources.csv')) as csvf:
         creader = csv.DictReader(csvf)
         for row in creader:
             paper_info[row['URL']] = {'city': row['City'],
                                       'paper': row['Outlet Name']}
 
+    # Load the Alexa rankings.
+    with open(os.path.join(path, 'Alexarank_noduplicates.csv')) as csvf:
+        creader = csv.DictReader(csvf)
+        for row in creader:
+            alexa_ranks[row['Domain']] = row['Global Rank']
+
     # Output JavaScript data for visualization.
-    print('var sampleData = ' + get_scores(news_sources, paper_info) + ';')
+    print('var sampleData = ' + get_scores(news_sources, paper_info, alexa_ranks) + ';')
 
 
 if __name__ == '__main__':

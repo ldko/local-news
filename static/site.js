@@ -27,73 +27,85 @@ function initMap() {
   plotData();
 }
 
-function normalizeMood(value, min, max) {
+function normalize(value, min, max) {
   return (value - min) / (max - min);
 }
 
 function plotData() {
-  // set up max and min for normalization
+  // set up max and min for sentiment normalization
   var moods = sampleData.map(function(newsSource) {
     return newsSource.netMood;
   });
   var minMood = Math.min.apply(Math, moods);
   var maxMood = Math.max.apply(Math, moods);
 
-  var positiveHeatmapData = [];
-  var negativeHeatmapData = [];
+  // set up max and min for rank normalization
+  var ranks = sampleData.map(function(newsSource) {
+    return newsSource.rank;
+  });
+  var minRank = Math.min.apply(Math, ranks);
+  var maxRank = Math.max.apply(Math, ranks);
+
   for(var i=0; i < sampleData.length; i++) {
     if(sampleData[i].date !== '201607271') continue;
+
+    // get coordinates and opacity
     var point = new google.maps.LatLng(sampleData[i].location.lat, sampleData[i].location.lng);
-    var weight = normalizeMood(Math.abs(sampleData[i].netMood), minMood, maxMood);
+    var weight = normalize(Math.abs(sampleData[i].netMood), minMood, maxMood);
+    var spot_data = [{'location': point, 'weight': weight}];
+
+    // calculate a radius between 20 and 40
+    var radius = 20;
+    if(sampleData[i].rank !== 0) {
+      radius = 40 - (20*normalize(Math.abs(sampleData[i].rank), minRank, maxRank));
+    }
+
     if(sampleData[i].netMood > 0) {
-      positiveHeatmapData.push({'location': point, 'weight': weight});
+      positiveHeatmap = new google.maps.visualization.HeatmapLayer({
+        data: spot_data,
+        map: map,
+        radius: radius,
+        gradient: [
+          'rgba(0,0,0,0)',
+          'rgba(229, 255, 229, 0.1)',
+          'rgba(229, 255, 229, 0.2)',
+          'rgba(229, 255, 229, 0.3)',
+          'rgba(229, 255, 229, 0.4)',
+          'rgba(204, 255, 204, 0.5)',
+          'rgba(178, 255, 178, 0.6)',
+          'rgba(153, 255, 153, 0.65)',
+          'rgba(127, 255, 127, 0.7)',
+          'rgba(102, 255, 102, 0.75)',
+          'rgba(76, 255, 76, 0.8)',
+          'rgba(50, 255, 50, 0.9)',
+          'rgba(25, 255, 25, 0.95)',
+          'rgba(0, 255, 0, 1.0)'
+        ]
+      });
     } else {
-      negativeHeatmapData.push({'location': point, 'weight': weight});
+      negativeHeatmap = new google.maps.visualization.HeatmapLayer({
+        data: spot_data,
+        map: map,
+        radius: radius,
+        gradient: [
+          'rgba(0,0,0,0)',
+          'rgba(255, 248, 248, 0.1)',
+          'rgba(255, 235, 236, 0.2)',
+          'rgba(255, 233, 234, 0.3)',
+          'rgba(255, 229, 229, 0.4)',
+          'rgba(255, 204, 204, 0.5)',
+          'rgba(255, 178, 178, 0.6)',
+          'rgba(255, 153, 153, 0.65)',
+          'rgba(255, 127, 127, 0.7)',
+          'rgba(255, 102, 102, 0.75)',
+          'rgba(255, 76, 76, 0.8)',
+          'rgba(255, 50, 50, 0.9)',
+          'rgba(255, 25, 25, 0.95)',
+          'rgba(255, 0, 0, 1.0)'
+        ]
+      });
     }
   }
-
-  positiveHeatmap = new google.maps.visualization.HeatmapLayer({
-    data: positiveHeatmapData,
-    map: map,
-    radius: 40,
-    gradient: [
-      'rgba(0, 0, 0, 0)',
-      'rgba(229, 255, 229, 0.1)',
-      'rgba(229, 255, 229, 0.2)',
-      'rgba(229, 255, 229, 0.3)',
-      'rgba(229, 255, 229, 0.4)',
-      'rgba(204, 255, 204, 0.5)',
-      'rgba(178, 255, 178, 0.6)',
-      'rgba(153, 255, 153, 0.65)',
-      'rgba(127, 255, 127, 0.7)',
-      'rgba(102, 255, 102, 0.75)',
-      'rgba(76, 255, 76, 0.8)',
-      'rgba(50, 255, 50, 0.9)',
-      'rgba(25, 255, 25, 0.95)',
-      'rgba(0, 255, 0, 1.0)'
-    ]
-  });
-  negativeHeatmap = new google.maps.visualization.HeatmapLayer({
-    data: negativeHeatmapData,
-    map: map,
-    radius: 40,
-    gradient: [
-      'rgba(0, 0, 0, 0.0)',
-      'rgba(255, 248, 248, 0.1)',
-      'rgba(255, 235, 236, 0.2)',
-      'rgba(255, 233, 234, 0.3)',
-      'rgba(255, 229, 229, 0.4)',
-      'rgba(255, 204, 204, 0.5)',
-      'rgba(255, 178, 178, 0.6)',
-      'rgba(255, 153, 153, 0.65)',
-      'rgba(255, 127, 127, 0.7)',
-      'rgba(255, 102, 102, 0.75)',
-      'rgba(255, 76, 76, 0.8)',
-      'rgba(255, 50, 50, 0.9)',
-      'rgba(255, 25, 25, 0.95)',
-      'rgba(255, 0, 0, 1.0)'
-    ]
-  });
 }
 
 function showPoints() {
