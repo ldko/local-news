@@ -121,7 +121,9 @@ function showPoints() {
     });
     google.maps.event.addListener(marker, 'click', (function(lmap, lmarker) {
       return function() {
-        //Create a new instance of the word cloud visualisation.
+        // clear out any related headlines
+        document.getElementById('graphs').innerHTML = '';
+        // create a new instance of the word cloud visualisation
         var headlines = lmarker.data.headlines.map(function(newsSource) {
           return newsSource.title;
         });
