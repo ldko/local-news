@@ -123,11 +123,12 @@ function showPoints() {
       return function() {
         //Create a new instance of the word cloud visualisation.
         var headlines = lmarker.data.headlines.map(function(newsSource) {
-    return newsSource.title;
-  });
+          return newsSource.title;
+        });
         var words = headlines.join(' ');
         d3.select('svg').remove();
         wordCloud(document.getElementById('word-cloud')).update(getWords(words));
+
         var titles = document.getElementById('titles');
         var html = '<h3>' + lmarker.data.paper + ' Headlines</h3><ul>';
         for(var k=0; k < lmarker.data.headlines.length; k++) {
@@ -143,7 +144,7 @@ function showPoints() {
 function showRelated(headline) {
   fetch('http://206.167.180.171:8080/related/20160727/'+encodeURIComponent(headline)).then(function(response) {
     return response.json().then( function (data){
-        var html = '<h3>Related</h3><ul>';
+      var html = '<h3>Related</h3><ul>';
         for(var k=0; k < data.related.length; k++) {
           html += '<li>'+data.related[k][0]+': '+data.related[k][1]+'</li>';
         }
@@ -215,11 +216,17 @@ function wordCloud(selector) {
 //Remove punctuation,
 // creating an array of words and computing a random size attribute.
 function getWords(words) {
-    return words
-            .replace(/[!\.,:;\?]/g, '')
-            .split(' ')
-            .map(function(d) {
-                return {text: d, size: 8 + Math.random() * 30};
+    var splitWords = words.replace(/[!\.,()+‘%\-’\/—:;\?|'"]/g, '').split(' ');
+    var frequencies = {};
+    for(i=0; i<splitWords.length; i++) {
+        word = splitWords[i];
+        // skip digit strings and stop words
+        if(/^(?:\d+|\w|by|the|or|in|and|at|an|as|is|to|of|on|&|but|for|its?|are|if)$/gi.test(word)) continue;
+        frequencies[word] = frequencies[word] || 0;
+        frequencies[word]++;
+    }
 
-            })
+    return splitWords.map(function(d) {
+      return {text: d, size: 12 + frequencies[d] * 4};
+    });
 }
