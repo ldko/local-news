@@ -15,7 +15,7 @@ locations in order to produce sentiment related data to be used
 by the visualization aspect.
 
 The visualization shows a U.S. map with heatmap layers identifying
-the net sentiment (positive/negative) of a newspaper' headlines on a
+the net sentiment (positive/negative) of a newspaper's headlines on a
 given date. The radius of the heatmap spot is based on the Alexa
 global ranking.
 
