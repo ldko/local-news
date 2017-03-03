@@ -126,9 +126,8 @@ function showPoints() {
     return newsSource.title;
   });
         var words = headlines.join(' ');
-        var myWordCloud = wordCloud(document.getElementById('word-cloud'));
-        myWordCloud.update(getWords(words));
-
+        d3.select('svg').remove();
+        wordCloud(document.getElementById('word-cloud')).update(getWords(words));
         var titles = document.getElementById('titles');
         var html = '<h3>' + lmarker.data.paper + ' Headlines</h3><ul>';
         for(var k=0; k < lmarker.data.headlines.length; k++) {
@@ -203,8 +202,8 @@ function wordCloud(selector) {
         update: function(words) {
             d3.layout.cloud().size([500, 500])
                 .words(words)
-                .padding(5)
-                .rotate(function() { return ~~(Math.random() * 2) * 90; })
+                .padding(1)
+                .rotate(function() { return ~~(Math.random() * 2) * 60 * (Math.random() < 0.5 ? -1 : 1); })
                 .font('Impact')
                 .fontSize(function(d) { return d.size; })
                 .on('end', draw)
@@ -213,13 +212,14 @@ function wordCloud(selector) {
     }
 }
 
-//Prepare one of the sample sentences by removing punctuation,
+//Remove punctuation,
 // creating an array of words and computing a random size attribute.
 function getWords(words) {
     return words
             .replace(/[!\.,:;\?]/g, '')
             .split(' ')
             .map(function(d) {
-                return {text: d, size: 10 + Math.random() * 60};
+                return {text: d, size: 8 + Math.random() * 30};
+
             })
 }
